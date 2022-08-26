@@ -1,0 +1,6 @@
+(library
+ (name cryptopals)
+ (libraries core ppx_sexp_conv ppx_string bitvec)
+ (inline_tests)
+ (preprocess
+  (pps ppx_jane)))
