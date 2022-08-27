@@ -20,6 +20,21 @@ let xor_encode plaintext key =
   |> Base64.hex_encode
 ;;
 
+let xor_repeating_key_encode plaintext key =
+  let full_key = String.to_list key in
+  let rec encode pt ky accum =
+    let zipped, rest = List.zip_with_remainder pt ky in
+    let new_accum = List.append accum zipped in
+    match rest with
+    | Some (First word) -> encode word full_key new_accum
+    | Some (Second _) -> new_accum
+    | None -> new_accum
+  in
+  encode (String.to_list plaintext) full_key []
+  |> List.map ~f:(fun (x, y) -> Int.bit_xor (Char.to_int x) (Char.to_int y))
+  |> Base64.hex_encode
+;;
+
 let xor_score cipher key =
   let data = Base64.hex_decode cipher in
   List.map ~f:(Fn.compose Char.of_int_exn (Int.bit_xor key)) data
