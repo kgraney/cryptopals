@@ -67,9 +67,6 @@ let compare_with_english counts =
        | `Right unused -> 10.0 *. unused
        | `Both (here, english) -> english -. here |> Float.abs)
   in
-  (*let () = 
-    Debug.eprints "foo" (Char.Caseless.Map.merge normalized english ~f:merge) sexp_of_norm_t
-  in*)
   Char.Caseless.Map.merge normalized english ~f:merge
   |> Char.Caseless.Map.fold ~init:0.0 ~f:accumulator
 ;;
