@@ -34,9 +34,17 @@ let set1_4 () =
   printf "output:   %s\n" soln
 ;;
 
+let set1_5 () =
+  print_endline "Set 1.5";
+  let input = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal" in
+  let soln = Xor.xor_repeating_key_encode input "ICE" in
+  printf "output:   %s\n" soln
+;;
+
 let () =
   set1_1 ();
   set1_2 ();
   set1_3 ();
-  set1_4 ()
+  set1_4 ();
+  set1_5 ()
 ;;
