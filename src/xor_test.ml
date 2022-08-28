@@ -47,3 +47,40 @@ let%expect_test "xor_repeating_key_encode" =
   [%expect
     {| 0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f |}]
 ;;
+
+let%expect_test "set_bit_count 0" =
+  set_bit_count 0 |> printf "%d";
+  [%expect {| 0 |}]
+;;
+
+let%expect_test "set_bit_count 1" =
+  set_bit_count 1 |> printf "%d";
+  [%expect {| 1 |}]
+;;
+
+let%expect_test "set_bit_count 3" =
+  set_bit_count 3 |> printf "%d";
+  [%expect {| 2 |}]
+;;
+
+let%expect_test "set_bit_count 8" =
+  set_bit_count 8 |> printf "%d";
+  [%expect {| 1 |}]
+;;
+
+let%expect_test "set_bit_count 9" =
+  set_bit_count 9 |> printf "%d";
+  [%expect {| 2 |}]
+;;
+
+let%expect_test "hamming_distance" =
+  [%sexp_of: (int, Error.t) Result.t] (hamming_distance "this is a test" "wokka wokka!!!")
+  |> Sexp.to_string |> print_string;
+  [%expect {| (Ok 37) |}]
+;;
+
+let%expect_test "hamming_distance unequal length" =
+  [%sexp_of: (int, Error.t) Result.t] (hamming_distance "this is a test" "wokka wokka!")
+  |> Sexp.to_string |> print_string;
+  [%expect {| (Error"input strings are not of equal length") |}]
+;;

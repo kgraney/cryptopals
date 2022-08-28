@@ -8,6 +8,7 @@ let xor lhs rhs =
 ;;
 
 let string_of_charlist l = l |> List.map ~f:(String.make 1) |> String.concat ~sep:""
+let intlist_of_string s = s |> String.to_list |> List.map ~f:Char.to_int
 
 let xor_decode cipher key =
   let data = Base64.hex_decode cipher in
@@ -15,13 +16,13 @@ let xor_decode cipher key =
 ;;
 
 let xor_encode plaintext key =
-  let data = String.to_list plaintext in
-  List.map ~f:(Fn.compose (Int.bit_xor (Char.to_int key)) Char.to_int) data
+  let data = intlist_of_string plaintext in
+  List.map ~f:(Int.bit_xor (Char.to_int key)) data
   |> Base64.hex_encode
 ;;
 
 let xor_repeating_key_encode plaintext key =
-  let full_key = String.to_list key in
+  let full_key = intlist_of_string key in
   let rec encode pt ky accum =
     let zipped, rest = List.zip_with_remainder pt ky in
     let new_accum = List.append accum zipped in
@@ -30,8 +31,8 @@ let xor_repeating_key_encode plaintext key =
     | Some (Second _) -> new_accum
     | None -> new_accum
   in
-  encode (String.to_list plaintext) full_key []
-  |> List.map ~f:(fun (x, y) -> Int.bit_xor (Char.to_int x) (Char.to_int y))
+  encode (intlist_of_string plaintext) full_key []
+  |> List.map ~f:(fun (x, y) -> Int.bit_xor x y)
   |> Base64.hex_encode
 ;;
 
@@ -58,4 +59,23 @@ let xor_decipher_from_list ciphers =
   |> List.sort ~compare:Poly.compare
   |> List.hd_exn
   |> snd
+;;
+
+let set_bit_count n =
+  let rec recurse n count =
+    match n with
+    | 0 -> count
+    | _ -> recurse (n lsr 1) (count + (n land 0x1))
+  in
+  recurse n 0
+;;
+
+let hamming_distance s1 s2 =
+  let xor_and_count (x, y) = x lxor y |> set_bit_count in
+  let zipped, remainder =
+    List.zip_with_remainder (intlist_of_string s1) (intlist_of_string s2)
+  in
+  match remainder with
+  | None -> Ok (zipped |> List.map ~f:xor_and_count |> List.fold_right ~f:( + ) ~init:0)
+  | Some _ -> Error (Error.of_string "input strings are not of equal length")
 ;;

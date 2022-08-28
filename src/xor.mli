@@ -13,3 +13,14 @@ val xor_decipher : string -> string
 (** [xor_decipher_from_list] returns the best match for a deciphered string
     from the given list of cipher strings *)
 val xor_decipher_from_list : string list -> string
+
+(** [hamming_distance] computes the Hamming distance between two strings, i.e.
+    the number of differing bits.
+
+    If the strings are unequal length returns an [Error.t], otherwise returns
+    an [int].*)
+val hamming_distance : string -> string -> (int, Base.Error.t) Result.t
+
+(** [set_bit_count] returns the number of bits that are 1 in the binary
+    representation of an integer *)
+val set_bit_count : int -> int
