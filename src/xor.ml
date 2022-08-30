@@ -80,5 +80,24 @@ let hamming_distance s1 s2 =
   in
   match remainder with
   | None -> Ok (zipped |> List.map ~f:xor_and_count |> List.fold_right ~f:( + ) ~init:0)
-  | Some _ -> Error (Error.of_string "input strings are not of equal length")
+  | Some _ ->
+    Error (Error.of_string "hamming_distance: input strings are not of equal length")
+;;
+
+let split_to_blocks list blocksize =
+  let rec recurse list accum =
+    let block, rest = List.split_n list blocksize in
+    match List.length rest with
+    | 0 -> List.append accum [ block ]
+    | _ -> recurse rest (List.append accum [ block ])
+  in
+  recurse list []
+;;
+
+let score_split ciphertext blocksize =
+  let splits = split_to_blocks ciphertext blocksize in
+  let args = List.nth splits 0, List.nth splits 1 in
+  match args with
+  | Some x, Some y -> hamming_distance (string_of_charlist x) (string_of_charlist y)
+  | _, _ -> Error (Error.of_string "score_split: ciphertext is too short!")
 ;;

@@ -82,5 +82,51 @@ let%expect_test "hamming_distance" =
 let%expect_test "hamming_distance unequal length" =
   [%sexp_of: (int, Error.t) Result.t] (hamming_distance "this is a test" "wokka wokka!")
   |> Sexp.to_string |> print_string;
-  [%expect {| (Error"input strings are not of equal length") |}]
+  [%expect {| (Error"hamming_distance: input strings are not of equal length") |}]
+;;
+
+let%expect_test "split_to_blocks even" =
+  [%sexp_of: int list list] (split_to_blocks (List.range 0 12) 3)
+  |> Sexp.to_string |> print_string;
+  [%expect {| ((0 1 2)(3 4 5)(6 7 8)(9 10 11)) |}]
+;;
+
+let%expect_test "split_to_blocks uneven" =
+  [%sexp_of: int list list] (split_to_blocks (List.range 0 14) 3)
+  |> Sexp.to_string |> print_string;
+  [%expect {| ((0 1 2)(3 4 5)(6 7 8)(9 10 11)(12 13)) |}]
+;;
+
+let%expect_test "split_to_blocks uneven" =
+  [%sexp_of: int list list] (split_to_blocks (List.range 0 2) 3)
+  |> Sexp.to_string |> print_string;
+  [%expect {| ((0 1)) |}]
+;;
+
+let%expect_test "score_split distance" =
+  [%sexp_of: (int, Error.t) Result.t] (score_split (String.to_list "aaabbb") 3)
+  |> Sexp.to_string
+  |> print_string;
+  [%expect {| (Ok 6) |}]
+;;
+
+let%expect_test "score_split no distance" =
+  [%sexp_of: (int, Error.t) Result.t] (score_split (String.to_list "aaaaaa") 3)
+  |> Sexp.to_string
+  |> print_string;
+  [%expect {| (Ok 0) |}]
+;;
+
+let%expect_test "score_split too short" =
+  [%sexp_of: (int, Error.t) Result.t] (score_split (String.to_list "aaaaaa") 4)
+  |> Sexp.to_string
+  |> print_string;
+  [%expect {| (Error"hamming_distance: input strings are not of equal length") |}]
+;;
+
+let%expect_test "score_split way too short" =
+  [%sexp_of: (int, Error.t) Result.t] (score_split (String.to_list "aaaaaa") 6)
+  |> Sexp.to_string
+  |> print_string;
+  [%expect {| (Error"score_split: ciphertext is too short!") |}]
 ;;

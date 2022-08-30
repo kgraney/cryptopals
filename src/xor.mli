@@ -24,3 +24,7 @@ val hamming_distance : string -> string -> (int, Base.Error.t) Result.t
 (** [set_bit_count] returns the number of bits that are 1 in the binary
     representation of an integer *)
 val set_bit_count : int -> int
+
+val split_to_blocks : 'a list -> int -> 'a list list
+
+val score_split : char list -> int -> (int, Base.Error.t) Result.t
