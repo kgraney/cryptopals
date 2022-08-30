@@ -25,17 +25,22 @@ let%expect_test "b64encode odd size" =
   [%expect {| SSdtIGs= |}]
 ;;
 
+let hex_decode_int x =
+  let open List.Let_syntax in
+  let%map hex = hex_decode x in Char.to_int hex
+;;
+
 let%expect_test "hexdecode basic" =
-  [%sexp_of: int list] (hex_decode "49276d206b") |> Sexp.to_string |> print_string;
+  [%sexp_of: int list] (hex_decode_int "49276d206b") |> Sexp.to_string |> print_string;
   [%expect {| (73 39 109 32 107) |}]
 ;;
 
 let%expect_test "hexdecode empty" =
-  [%sexp_of: int list] (hex_decode "") |> Sexp.to_string |> print_string;
+  [%sexp_of: int list] (hex_decode_int "") |> Sexp.to_string |> print_string;
   [%expect {| () |}]
 ;;
 
-let%test "hexdecode invalid" = Exn.does_raise (fun () -> hex_decode "zz")
+let%test "hexdecode invalid" = Exn.does_raise (fun () -> hex_decode_int "zz")
 
 let%expect_test "hexencode basic" =
   hex_encode [ 73; 39; 109; 32; 107 ] |> print_string;

@@ -76,8 +76,13 @@ let rec hex_decode xs =
   if phys_equal (String.length xs) 0
   then []
   else
-    int_of_string ("0x" ^ String.sub xs ~pos:0 ~len:2)
+    Char.of_int_exn (int_of_string ("0x" ^ String.sub xs ~pos:0 ~len:2))
     :: hex_decode (String.sub xs ~pos:2 ~len:(String.length xs - 2))
+;;
+
+let hex_decode_int xs =
+  let open List.Let_syntax in
+  let%map c = hex_decode xs in Char.to_int c
 ;;
 
 let rec hex_encode ints =
@@ -119,7 +124,7 @@ let pad_b64_output s =
 ;;
 
 let b64encode h =
-  let decoded = hex_decode h in
+  let decoded = hex_decode_int h in
   let padded_bytes = List.map ~f:(Fn.compose pad_eight_bits base2_string) decoded in
   String.concat ~sep:"" padded_bytes
   |> base2_to_base64

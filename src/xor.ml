@@ -4,21 +4,25 @@ let xor lhs rhs =
   let lhs_bytes = Base64.hex_decode lhs in
   let rhs_bytes = Base64.hex_decode rhs in
   let zipped, _ = List.zip_with_remainder lhs_bytes rhs_bytes in
-  List.map ~f:(fun (x, y) -> Int.bit_xor x y) zipped |> Base64.hex_encode
+  List.map ~f:(fun (x, y) -> Int.bit_xor (Char.to_int x) (Char.to_int y)) zipped
+  |> Base64.hex_encode
 ;;
 
 let string_of_charlist l = l |> List.map ~f:(String.make 1) |> String.concat ~sep:""
+
 let intlist_of_string s = s |> String.to_list |> List.map ~f:Char.to_int
 
-let xor_decode cipher key =
-  let data = Base64.hex_decode cipher in
-  List.map ~f:(Fn.compose Char.of_int_exn (Int.bit_xor key)) data |> string_of_charlist
+let xor_decode_chars cipher key =
+  let open List.Let_syntax in
+  let%map data = Base64.hex_decode cipher in
+  Int.bit_xor key (Char.to_int data) |> Char.of_int_exn
 ;;
+
+let xor_decode cipher key = xor_decode_chars cipher key |> string_of_charlist
 
 let xor_encode plaintext key =
   let data = intlist_of_string plaintext in
-  List.map ~f:(Int.bit_xor (Char.to_int key)) data
-  |> Base64.hex_encode
+  List.map ~f:(Int.bit_xor (Char.to_int key)) data |> Base64.hex_encode
 ;;
 
 let xor_repeating_key_encode plaintext key =
@@ -37,8 +41,7 @@ let xor_repeating_key_encode plaintext key =
 ;;
 
 let xor_score cipher key =
-  let data = Base64.hex_decode cipher in
-  List.map ~f:(Fn.compose Char.of_int_exn (Int.bit_xor key)) data
+  xor_decode_chars cipher key
   |> List.fold ~init:Freq_counter.empty ~f:Freq_counter.touch
   |> Freq_counter.compare_with_english
 ;;
