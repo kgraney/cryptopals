@@ -9,7 +9,6 @@ let xor lhs rhs =
 ;;
 
 let string_of_charlist l = l |> List.map ~f:(String.make 1) |> String.concat ~sep:""
-
 let intlist_of_string s = s |> String.to_list |> List.map ~f:Char.to_int
 
 let xor_decode_chars cipher key =
@@ -95,9 +94,12 @@ let split_to_blocks list blocksize =
 ;;
 
 let score_split ciphertext blocksize =
-  let splits = split_to_blocks ciphertext blocksize in
+  let splits = split_to_blocks (String.to_list ciphertext) blocksize in
   let args = List.nth splits 0, List.nth splits 1 in
   match args with
-  | Some x, Some y -> hamming_distance (string_of_charlist x) (string_of_charlist y)
+  | Some x, Some y ->
+    let open Result.Let_syntax in
+    let%map dist = hamming_distance (string_of_charlist x) (string_of_charlist y) in
+    float_of_int dist /. float_of_int blocksize
   | _, _ -> Error (Error.of_string "score_split: ciphertext is too short!")
 ;;

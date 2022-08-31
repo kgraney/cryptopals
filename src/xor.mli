@@ -27,4 +27,7 @@ val set_bit_count : int -> int
 
 val split_to_blocks : 'a list -> int -> 'a list list
 
-val score_split : char list -> int -> (int, Base.Error.t) Result.t
+(** [score_split] given ciphertext and the a key length returns a normalized
+    "score", with lower scores being a more likely key length for a repeating
+    key cipher *)
+val score_split : string -> int -> (float, Base.Error.t) Result.t
