@@ -72,23 +72,30 @@ let b64char bits =
   | b -> raise_s [%message "Invalid bit string" b]
 ;;
 
-let rec hex_decode xs =
-  if phys_equal (String.length xs) 0
-  then []
-  else
-    Char.of_int_exn (int_of_string ("0x" ^ String.sub xs ~pos:0 ~len:2))
-    :: hex_decode (String.sub xs ~pos:2 ~len:(String.length xs - 2))
+let hex_decode s =
+  let rec recurse xs =
+    if phys_equal (String.length xs) 0
+    then []
+    else
+      Char.of_int_exn (int_of_string ("0x" ^ String.sub xs ~pos:0 ~len:2))
+      :: recurse (String.sub xs ~pos:2 ~len:(String.length xs - 2))
+  in
+  recurse s |> String.of_char_list
 ;;
 
 let hex_decode_int xs =
   let open List.Let_syntax in
-  let%map c = hex_decode xs in Char.to_int c
+  let%map c = hex_decode xs |> String.to_list in
+  Char.to_int c
 ;;
 
-let rec hex_encode ints =
-  match ints with
-  | [] -> ""
-  | x :: xs -> Printf.sprintf "%02x" x ^ hex_encode xs
+let hex_encode s =
+  let rec recurse ints =
+    match ints with
+    | [] -> ""
+    | x :: xs -> Printf.sprintf "%02x" x ^ recurse xs
+  in
+  String.to_list s |> List.map ~f:Char.to_int |> recurse
 ;;
 
 let rec base2_string i =

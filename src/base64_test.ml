@@ -27,7 +27,8 @@ let%expect_test "b64encode odd size" =
 
 let hex_decode_int x =
   let open List.Let_syntax in
-  let%map hex = hex_decode x in Char.to_int hex
+  let%map hex = hex_decode x |> String.to_list in
+  Char.to_int hex
 ;;
 
 let%expect_test "hexdecode basic" =
@@ -43,11 +44,11 @@ let%expect_test "hexdecode empty" =
 let%test "hexdecode invalid" = Exn.does_raise (fun () -> hex_decode_int "zz")
 
 let%expect_test "hexencode basic" =
-  hex_encode [ 73; 39; 109; 32; 107 ] |> print_string;
+  hex_encode "I'm k" |> print_string;
   [%expect {| 49276d206b |}]
 ;;
 
 let%expect_test "hexencode empty" =
-  hex_encode [] |> print_string;
+  hex_encode "" |> print_string;
   [%expect {| |}]
 ;;

@@ -10,9 +10,9 @@ val xor_repeating_key_encode : string -> string -> string
 (** [xor_decipher] attempts to decipher a cipher string without the key *)
 val xor_decipher : string -> string
 
-(** [xor_decipher_from_list] returns the best match for a deciphered string
-    from the given list of cipher strings *)
-val xor_decipher_from_list : string list -> string
+(** [xor_decipher_with_score] attempts to decipher a string without the key,
+    also returning a score (higher values are better matches) *)
+val xor_decipher_with_score : string -> float * string
 
 (** [hamming_distance] computes the Hamming distance between two strings, i.e.
     the number of differing bits.

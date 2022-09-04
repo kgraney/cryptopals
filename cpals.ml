@@ -12,32 +12,39 @@ let set1_1 () =
 ;;
 
 let set1_2 () =
-  let lhs = "1c0111001f010100061a024b53535009181c" in
-  let rhs = "686974207468652062756c6c277320657965" in
+  let lhs = Base64.hex_decode "1c0111001f010100061a024b53535009181c" in
+  let rhs = Base64.hex_decode "686974207468652062756c6c277320657965" in
   let expected = "746865206b696420646f6e277420706c6179" in
   print_endline "Set 1.2";
   printf "expected: %s\n" expected;
-  printf "output:   %s\n" (Xor.xor lhs rhs)
+  printf "output:   %s\n" (Base64.hex_encode (Xor.xor lhs rhs))
 ;;
 
 let set1_3 () =
   print_endline "Set 1.3";
-  let input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736" in
+  let input =
+    "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+    |> Base64.hex_decode
+  in
   printf "output:   %s\n" (Xor.xor_decipher input)
 ;;
 
 let set1_4 () =
   print_endline "Set 1.4";
-  let soln =
-    Stdio.In_channel.read_lines "./input/4.txt" |> Xor.xor_decipher_from_list
+  let scored =
+    let open List.Let_syntax in
+    let%map line = Stdio.In_channel.read_lines "./input/4.txt" in
+    Base64.hex_decode line |> Xor.xor_decipher_with_score
   in
-  printf "output:   %s\n" soln
+  List.sort ~compare:Poly.compare scored |> List.hd_exn |> snd |> printf "output:   %s\n"
 ;;
 
 let set1_5 () =
   print_endline "Set 1.5";
-  let input = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal" in
-  let soln = Xor.xor_repeating_key_encode input "ICE" in
+  let input =
+    "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+  in
+  let soln = Xor.xor_repeating_key_encode input "ICE" |> Base64.hex_encode in
   printf "output:   %s\n" soln
 ;;
 

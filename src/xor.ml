@@ -1,27 +1,32 @@
 open! Core
 
-let xor lhs rhs =
-  let lhs_bytes = Base64.hex_decode lhs in
-  let rhs_bytes = Base64.hex_decode rhs in
-  let zipped, _ = List.zip_with_remainder lhs_bytes rhs_bytes in
-  List.map ~f:(fun (x, y) -> Int.bit_xor (Char.to_int x) (Char.to_int y)) zipped
-  |> Base64.hex_encode
-;;
-
 let string_of_charlist l = l |> List.map ~f:(String.make 1) |> String.concat ~sep:""
 let intlist_of_string s = s |> String.to_list |> List.map ~f:Char.to_int
 
+let xor lhs rhs =
+  let lhs_bytes = lhs |> String.to_list in
+  let rhs_bytes = rhs |> String.to_list in
+  let zipped, _ = List.zip_with_remainder lhs_bytes rhs_bytes in
+  List.map ~f:(fun (x, y) -> Int.bit_xor (Char.to_int x) (Char.to_int y)) zipped
+  |> List.map ~f:Char.of_int_exn
+  |> string_of_charlist
+;;
+
 let xor_decode_chars cipher key =
   let open List.Let_syntax in
-  let%map data = Base64.hex_decode cipher in
+  let%map data = String.to_list cipher in
   Int.bit_xor key (Char.to_int data) |> Char.of_int_exn
 ;;
 
 let xor_decode cipher key = xor_decode_chars cipher key |> string_of_charlist
 
 let xor_encode plaintext key =
-  let data = intlist_of_string plaintext in
-  List.map ~f:(Int.bit_xor (Char.to_int key)) data |> Base64.hex_encode
+  let lst =
+    let open List.Let_syntax in
+    let%map data = intlist_of_string plaintext in
+    Int.bit_xor (Char.to_int key) data |> Char.of_int_exn
+  in
+  String.of_char_list lst
 ;;
 
 let xor_repeating_key_encode plaintext key =
@@ -36,7 +41,8 @@ let xor_repeating_key_encode plaintext key =
   in
   encode (intlist_of_string plaintext) full_key []
   |> List.map ~f:(fun (x, y) -> Int.bit_xor x y)
-  |> Base64.hex_encode
+  |> List.map ~f:Char.of_int_exn
+  |> String.of_char_list
 ;;
 
 let xor_score cipher key =
@@ -45,7 +51,7 @@ let xor_score cipher key =
   |> Freq_counter.compare_with_english
 ;;
 
-let xor_decipher_with_scores cipher =
+let xor_decipher_with_score cipher =
   let scores =
     List.map ~f:(fun x -> xor_score cipher x, x) (List.range 0x00 0xff ~stop:`inclusive)
   in
@@ -54,14 +60,7 @@ let xor_decipher_with_scores cipher =
   |> fun (score, key) -> score, xor_decode cipher key
 ;;
 
-let xor_decipher = Fn.compose snd xor_decipher_with_scores
-
-let xor_decipher_from_list ciphers =
-  List.map ~f:xor_decipher_with_scores ciphers
-  |> List.sort ~compare:Poly.compare
-  |> List.hd_exn
-  |> snd
-;;
+let xor_decipher = Fn.compose snd xor_decipher_with_score
 
 let set_bit_count n =
   let rec recurse n count =
