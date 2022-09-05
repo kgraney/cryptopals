@@ -1,5 +1,7 @@
 open! Core
 
+exception Internal_error of string
+
 let string_of_charlist l = l |> List.map ~f:(String.make 1) |> String.concat ~sep:""
 let intlist_of_string s = s |> String.to_list |> List.map ~f:Char.to_int
 
@@ -57,14 +59,16 @@ let xor_decipher_with_score cipher =
   in
   List.sort scores ~compare:Poly.compare
   |> List.hd_exn
-  |> fun (score, key) -> score, (Char.of_int_exn key), xor_decode cipher key
+  |> fun (score, key) -> score, Char.of_int_exn key, xor_decode cipher key
 ;;
 
 let xor_decipher_with_key =
-  Fn.compose (fun (_, key, deciphered) -> (key, deciphered)) xor_decipher_with_score
+  Fn.compose (fun (_, key, deciphered) -> key, deciphered) xor_decipher_with_score
 ;;
 
-let xor_decipher = Fn.compose (fun (_, _, deciphered) -> deciphered) xor_decipher_with_score
+let xor_decipher =
+  Fn.compose (fun (_, _, deciphered) -> deciphered) xor_decipher_with_score
+;;
 
 let set_bit_count n =
   let rec recurse n count =
@@ -105,4 +109,57 @@ let score_split ciphertext blocksize =
     let%map dist = hamming_distance (string_of_charlist x) (string_of_charlist y) in
     float_of_int dist /. float_of_int blocksize
   | _, _ -> Error (Error.of_string "score_split: ciphertext is too short!")
+;;
+
+let transpose ciphertext blocksize =
+  let result =
+    split_to_blocks (String.to_list ciphertext) blocksize
+    |> Util.discard_partial
+    |> List.transpose
+  in
+  match result with
+  | None -> raise (Internal_error "uneven list lengths are unexpected")
+  | Some y -> List.map ~f:string_of_charlist y
+;;
+
+let ranked_keysizes ciphertext =
+  let open List.Let_syntax in
+  let keylengths =
+    let%map keysize = List.range 2 50 in
+    match score_split ciphertext keysize with
+    | Ok score -> Some (score, keysize)
+    | _ -> None
+  in
+  let%map scored =
+    keylengths |> List.filter_map ~f:Fn.id |> List.sort ~compare:Poly.compare
+  in
+  snd scored
+;;
+
+let xor_repeating_key_decipher ciphertext =
+  let open List.Let_syntax in
+  let scored_results =
+    let%map key =
+      let%map blocksize = ranked_keysizes ciphertext in
+      let keychars =
+        let%map keychar, _ =
+          let%map block = transpose ciphertext blocksize in
+          xor_decipher_with_key block
+        in
+        String.make 1 keychar
+      in
+      List.fold_left ~init:"" ~f:( ^ ) keychars
+    in
+    let deciphered = xor_repeating_key_encode ~key ciphertext in
+    let score =
+      deciphered
+      |> String.to_list
+      |> List.fold ~init:Freq_counter.empty ~f:Freq_counter.touch
+      |> Freq_counter.compare_with_english
+    in
+    score, key, deciphered
+  in
+  match List.sort ~compare:Poly.compare scored_results |> List.hd with
+  | Some (_, key, deciphered) -> Some (key, deciphered)
+  | None -> None
 ;;

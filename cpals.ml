@@ -52,8 +52,18 @@ let set1_5 () =
 
 let set1_6 () =
   print_endline "Set 1.6";
-  let input = Stdio.In_channel.read_lines "./input/6.txt" |> String.concat ~sep:"" in
-  print_string input
+  let input =
+    Stdio.In_channel.read_lines "./input/6.txt"
+    |> String.concat ~sep:""
+    |> Base64.b64decode
+    |> Result.ok
+    |> Option.value_exn
+  in
+  match Xor.xor_repeating_key_decipher input with
+  | Some (key, soln) ->
+    printf "key:   %s\n" key;
+    print_string soln
+  | None -> print_string "FAILED!"
 ;;
 
 let () =

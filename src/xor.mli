@@ -4,9 +4,6 @@ val xor : string -> string -> string
 (** [xor_encode] takes plaintext and a key; ouputs a cipher string *)
 val xor_encode : string -> char -> string
 
-(** [xor_repeating_key_encode] encodes plaintext input with a repeating key *)
-val xor_repeating_key_encode : key:string -> string -> string
-
 (** [xor_decipher] attempts to decipher a cipher string without the key,
     returning only the deciphered text *)
 val xor_decipher : string -> string
@@ -17,6 +14,13 @@ val xor_decipher_with_score : string -> float * char * string
 
 (** [xor_decipher_with_key] returns the key with the deciphered string *)
 val xor_decipher_with_key : string -> char * string
+
+(** [xor_repeating_key_encode] encodes plaintext input with a repeating key *)
+val xor_repeating_key_encode : key:string -> string -> string
+
+(** [xor_repeating_key_decipher] attempts to decipher a repeating key
+    ciphertext.  The output is a key and the deciphered text. *)
+val xor_repeating_key_decipher : string -> (string * string) option
 
 (** [hamming_distance] computes the Hamming distance between two strings, i.e.
     the number of differing bits.
@@ -35,3 +39,5 @@ val split_to_blocks : 'a list -> int -> 'a list list
     "score", with lower scores being a more likely key length for a repeating
     key cipher *)
 val score_split : string -> int -> (float, Base.Error.t) Result.t
+
+val transpose : string -> int -> string list
