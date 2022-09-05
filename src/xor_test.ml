@@ -43,10 +43,11 @@ let%expect_test "xor_file" =
     let%map line = Stdio.In_channel.read_lines "../../..//input/4.txt" in
     Base64.hex_decode line |> Xor.xor_decipher_with_score
   in
-  [%sexp_of: (float * string) option] (List.sort ~compare:Poly.compare scored |> List.hd)
+  [%sexp_of: (float * char * string) option]
+    (List.sort ~compare:Poly.compare scored |> List.hd)
   |> Sexp.to_string
   |> print_string;
-  [%expect {| ((2.1132745578746159"Now that the party is jumping\n")) |}]
+  [%expect {| ((2.1132745578746159 5"Now that the party is jumping\n")) |}]
 ;;
 
 let%expect_test "xor_repeating_key_encode" =

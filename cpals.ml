@@ -36,7 +36,9 @@ let set1_4 () =
     let%map line = Stdio.In_channel.read_lines "./input/4.txt" in
     Base64.hex_decode line |> Xor.xor_decipher_with_score
   in
-  List.sort ~compare:Poly.compare scored |> List.hd_exn |> snd |> printf "output:   %s\n"
+  List.sort ~compare:Poly.compare scored
+  |> List.hd_exn
+  |> fun (_, _, s) -> printf "output:   %s\n" s
 ;;
 
 let set1_5 () =
@@ -48,10 +50,17 @@ let set1_5 () =
   printf "output:   %s\n" soln
 ;;
 
+let set1_6 () =
+  print_endline "Set 1.6";
+  let input = Stdio.In_channel.read_lines "./input/6.txt" |> String.concat ~sep:"" in
+  print_string input
+;;
+
 let () =
   set1_1 ();
   set1_2 ();
   set1_3 ();
   set1_4 ();
-  set1_5 ()
+  set1_5 ();
+  set1_6 ()
 ;;

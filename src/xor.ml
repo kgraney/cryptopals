@@ -57,10 +57,14 @@ let xor_decipher_with_score cipher =
   in
   List.sort scores ~compare:Poly.compare
   |> List.hd_exn
-  |> fun (score, key) -> score, xor_decode cipher key
+  |> fun (score, key) -> score, (Char.of_int_exn key), xor_decode cipher key
 ;;
 
-let xor_decipher = Fn.compose snd xor_decipher_with_score
+let xor_decipher_with_key =
+  Fn.compose (fun (_, key, deciphered) -> (key, deciphered)) xor_decipher_with_score
+;;
+
+let xor_decipher = Fn.compose (fun (_, _, deciphered) -> deciphered) xor_decipher_with_score
 
 let set_bit_count n =
   let rec recurse n count =

@@ -7,12 +7,16 @@ val xor_encode : string -> char -> string
 (** [xor_repeating_key_encode] encodes plaintext input with a repeating key *)
 val xor_repeating_key_encode : string -> string -> string
 
-(** [xor_decipher] attempts to decipher a cipher string without the key *)
+(** [xor_decipher] attempts to decipher a cipher string without the key,
+    returning only the deciphered text *)
 val xor_decipher : string -> string
 
 (** [xor_decipher_with_score] attempts to decipher a string without the key,
     also returning a score (higher values are better matches) *)
-val xor_decipher_with_score : string -> float * string
+val xor_decipher_with_score : string -> float * char * string
+
+(** [xor_decipher_with_key] returns the key with the deciphered string *)
+val xor_decipher_with_key : string -> char * string
 
 (** [hamming_distance] computes the Hamming distance between two strings, i.e.
     the number of differing bits.
