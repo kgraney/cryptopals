@@ -46,7 +46,7 @@ let set1_5 () =
   let input =
     "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
   in
-  let soln = Xor.xor_repeating_key_encode input "ICE" |> Base64.hex_encode in
+  let soln = Xor.xor_repeating_key_encode ~key:"ICE" input |> Base64.hex_encode in
   printf "output:   %s\n" soln
 ;;
 

@@ -5,7 +5,7 @@ val xor : string -> string -> string
 val xor_encode : string -> char -> string
 
 (** [xor_repeating_key_encode] encodes plaintext input with a repeating key *)
-val xor_repeating_key_encode : string -> string -> string
+val xor_repeating_key_encode : key:string -> string -> string
 
 (** [xor_decipher] attempts to decipher a cipher string without the key,
     returning only the deciphered text *)

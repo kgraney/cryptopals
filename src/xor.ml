@@ -29,7 +29,7 @@ let xor_encode plaintext key =
   String.of_char_list lst
 ;;
 
-let xor_repeating_key_encode plaintext key =
+let xor_repeating_key_encode ~key plaintext =
   let full_key = intlist_of_string key in
   let rec encode pt ky accum =
     let zipped, rest = List.zip_with_remainder pt ky in
