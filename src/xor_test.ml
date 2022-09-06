@@ -196,7 +196,7 @@ let%expect_test "xor_repeating_key_decipher input6" =
 ;;
 
 let input6 =
-  Stdio.In_channel.read_lines "/Users/kmg/cryptopals/input/6.txt"
+  Stdio.In_channel.read_lines "../../../input/6.txt"
   |> String.concat ~sep:""
   |> Base64.b64decode
   |> Result.ok
