@@ -66,11 +66,23 @@ let set1_6 () =
   | None -> print_string "FAILED!"
 ;;
 
+let set1_7 () =
+  print_endline "Set 1.7";
+  Stdio.In_channel.read_lines "./input/7.txt"
+  |> String.concat ~sep:""
+  |> Base64.b64decode
+  |> Result.ok
+  |> Option.value_exn
+  |> Ecb.decrypt7
+  |> print_string
+;;
+
 let () =
   set1_1 ();
   set1_2 ();
   set1_3 ();
   set1_4 ();
   set1_5 ();
-  set1_6 ()
+  set1_6 ();
+  set1_7 ()
 ;;
