@@ -8,6 +8,11 @@ let decrypt7 ciphertext =
   Cstruct.to_string pt
 ;;
 
+let encrypt7 plaintext =
+  let padded = Block.pkcs7 plaintext in
+  let et = ECB.encrypt ~key:keyfor7 (Cstruct.of_string padded) in
+  Cstruct.to_string et
+
 (** ECB encryption has blocksize of 16 bytes.  If the same 16 byte block is
     repeated in the input text it will also be repeated in the encrypted
     text. *)

@@ -1,6 +1,6 @@
 open! Core
 
-let%expect_test "ecb" =
+let%expect_test "ecb input file" =
   Stdio.In_channel.read_lines "../../../input/7.txt"
   |> String.concat ~sep:""
   |> Base64.b64decode
@@ -8,7 +8,8 @@ let%expect_test "ecb" =
   |> Option.value_exn
   |> Ecb.decrypt7
   |> print_string;
-  [%expect {|
+  [%expect
+    {|
     I'm back and I'm ringin' the bell
     A rockin' on the mike while the fly girls yell
     In ecstasy in the back of me
@@ -89,4 +90,20 @@ let%expect_test "ecb" =
     Play that funky music, white boy Come on, Come on, Come on
     Play that funky music
      |}]
+;;
+
+let%expect_test "ecb encrypt decrypt" =
+  let open List.Let_syntax in
+  let encrypted =
+    let%map pt =
+      [ "this is some string that I want to encrypt"
+      ; "foo"
+      ; "!!@@@##hi there"
+      ; "0123456789abcdef"
+      ]
+    in
+    pt |> Ecb.encrypt7 |> Ecb.decrypt7
+  in
+  [%sexp_of: string list] encrypted |> Sexp.to_string |> print_string;
+  [%expect {| ("this is some string that I want to encrypt\006\006\006\006\006\006""foo\r\r\r\r\r\r\r\r\r\r\r\r\r""!!@@@##hi there\001""0123456789abcdef\016\016\016\016\016\016\016\016\016\016\016\016\016\016\016\016") |}]
 ;;
